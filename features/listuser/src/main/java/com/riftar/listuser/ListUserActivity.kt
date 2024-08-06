@@ -28,7 +28,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,7 +49,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import com.riftar.common.ui.theme.GithubConnectTheme
+import com.riftar.domain.listuser.model.User
+import org.koin.androidx.compose.koinViewModel
 
 class ListUserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,9 +74,14 @@ class ListUserActivity : ComponentActivity() {
 
 @Composable
 fun ListUserScreen(modifier: Modifier = Modifier) {
+    val viewModel: ListUserViewModel = koinViewModel()
+//    val users by rememberUpdatedState(newValue = viewModel.getListUser().collectAsLazyPagingItems())
+
+    val users = viewModel.getListUser().collectAsLazyPagingItems()
+
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         SearchBar()
-        ListOutlet()
+        ListOutlet(users)
     }
 }
 
@@ -112,23 +122,21 @@ fun SearchBar() {
 }
 
 @Composable
-fun ListOutlet() {
+fun ListOutlet(users: LazyPagingItems<User>) {
     LazyColumn() {
-        items(10) { index: Int ->
-            when (index) {
-                8 ->  LoadingItem()
-                9 -> ErrorItem(message = "Unknown Error") {
-
-                }
-                else -> UserItem()
+        items(
+            users.itemCount
+        ) { index ->
+            val outlet = users[index]
+            outlet?.let {
+                UserItem(it)
             }
         }
-
     }
 }
 
 @Composable
-fun UserItem() {
+fun UserItem(user: User) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -146,8 +154,8 @@ fun UserItem() {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_test),
+            AsyncImage(
+                model = user.avatarUrl,
                 contentDescription = "user image",
                 modifier = Modifier
                     .size(40.dp)
@@ -158,8 +166,8 @@ fun UserItem() {
                     .weight(4f)
                     .padding(horizontal = 8.dp)
             ) {
-                Text(text = "UserName", style = MaterialTheme.typography.titleMedium)
-                Text(text = "details details", style = MaterialTheme.typography.bodySmall)
+                Text(text = user.userName, style = MaterialTheme.typography.titleMedium)
+                Text(text = user.htmlUrl, style = MaterialTheme.typography.bodySmall)
             }
 
             IconButton(modifier = Modifier.weight(1f), onClick = { /*TODO*/ }) {
@@ -187,7 +195,7 @@ fun ErrorItem(message: String, onRetryClick: () -> Unit) {
         )
         Text(text = message, style = MaterialTheme.typography.bodyMedium)
         Button(
-            onClick = { onRetryClick },
+            onClick = { onRetryClick.invoke() },
             modifier = Modifier.padding(top = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.DarkGray,

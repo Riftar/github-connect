@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -12,6 +14,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        val properties = Properties().apply {
+            rootProject.file("local.properties").reader().use(::load)
+        }
+        val token = properties.getProperty("token", "")
+
+        buildConfigField("String", "BASE_URL", "\"https://api.github.com/\"")
+        buildConfigField("String", "TOKEN", token)
     }
 
     buildTypes {
@@ -30,11 +40,19 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     implementation(project(":domain"))
 
+    api(libs.retrofit)
+    api(libs.okHttp)
+    implementation(libs.okHttpLoggingInterceptor)
+    implementation(libs.paging.compose)
+    implementation(libs.retrofit.gson.converter)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

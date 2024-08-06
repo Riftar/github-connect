@@ -51,6 +51,9 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":core:common"))
 
+    implementation(libs.paging.compose)
+    implementation(libs.koin.compose)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
