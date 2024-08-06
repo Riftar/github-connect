@@ -21,4 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "GithubConnect"
 include(":app")
- 
+include(":data")
+include(":domain")
+include(":core:common")
+include(":features:listuser")
+include(":features:userdetail")
