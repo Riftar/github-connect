@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -51,6 +52,9 @@ dependencies {
     api(libs.retrofit)
     api(libs.okHttp)
     api(libs.koin.compose)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.paging)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.okHttpLoggingInterceptor)
     implementation(libs.paging.compose)
     implementation(libs.retrofit.gson.converter)

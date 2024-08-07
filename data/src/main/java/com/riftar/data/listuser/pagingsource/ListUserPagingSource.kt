@@ -4,10 +4,16 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toDomainModel
+import com.riftar.data.listuser.mapper.toEntity
+import com.riftar.data.listuser.model.UserResponse
+import com.riftar.data.listuser.room.dao.ListUserDao
 import com.riftar.domain.listuser.model.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ListUserPagingSource(
-    private val api: ListUserAPI
+    private val api: ListUserAPI,
+    private val dao: ListUserDao
 ) : PagingSource<Int, User>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
@@ -33,8 +39,19 @@ class ListUserPagingSource(
         }
     }
 
+    private suspend fun saveDataToLocal(page: Int, data: List<UserResponse>?) = withContext(
+        Dispatchers.IO
+    ) {
+        if (page == 0) {
+            dao.clearAll()
+        }
+        dao.insertAll(data.orEmpty().map { it.toEntity() })
+    }
+
     override fun getRefreshKey(state: PagingState<Int, User>): Int? {
-        return null
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey
+        }
     }
 
     companion object {

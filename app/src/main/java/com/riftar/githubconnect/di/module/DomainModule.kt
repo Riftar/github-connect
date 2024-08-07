@@ -9,8 +9,8 @@ import com.riftar.domain.userdetail.usecase.GetUserDetailUseCase
 import org.koin.dsl.module
 
 val domainModule = module  {
-    single<ListUserRepository> { ListUserRepositoryImpl(get()) }
     single<UserDetailRepository> { UserDetailRepositoryImpl(get()) }
+    single<ListUserRepository> { ListUserRepositoryImpl(get(), get()) }
     single { GetListUserUseCase(get()) }
     single { GetUserDetailUseCase(get()) }
 }

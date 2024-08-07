@@ -50,7 +50,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
@@ -80,13 +79,9 @@ class ListUserActivity : ComponentActivity() {
 @Composable
 fun ListUserScreen(modifier: Modifier = Modifier) {
     val viewModel: ListUserViewModel = koinViewModel()
-//    val users by rememberUpdatedState(newValue = viewModel.getListUser().collectAsLazyPagingItems())
-
-    val users = viewModel.getListUser().collectAsLazyPagingItems()
-
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         SearchBar()
-        ListOutlet(users)
+        ListOutlet(viewModel)
     }
 }
 
@@ -127,7 +122,8 @@ fun SearchBar() {
 }
 
 @Composable
-fun ListOutlet(users: LazyPagingItems<User>) {
+fun ListOutlet(viewModel: ListUserViewModel) {
+    val users = viewModel.getListUser().collectAsLazyPagingItems()
     LazyColumn {
         items(
             count = users.itemCount,
@@ -171,6 +167,7 @@ fun ListOutlet(users: LazyPagingItems<User>) {
         }
     }
 }
+
 
 @Composable
 fun UserItem(user: User) {

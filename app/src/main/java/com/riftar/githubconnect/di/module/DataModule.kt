@@ -1,8 +1,8 @@
 package com.riftar.githubconnect.di.module
 
-import com.riftar.data.base.client.createOkHttp
-import com.riftar.data.base.client.createRetrofit
-import com.riftar.data.base.client.provideNetworkErrorInterceptor
+import com.riftar.data.common.client.createOkHttp
+import com.riftar.data.common.client.createRetrofit
+import com.riftar.data.common.client.provideNetworkErrorInterceptor
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.userdetail.api.UserDetailAPI
 import org.koin.dsl.module

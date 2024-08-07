@@ -1,4 +1,4 @@
-package com.riftar.data.base.client
+package com.riftar.data.common.client
 
 import android.content.Context
 import com.riftar.data.BuildConfig
