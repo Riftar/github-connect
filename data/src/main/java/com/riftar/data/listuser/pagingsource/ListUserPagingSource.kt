@@ -12,18 +12,18 @@ class ListUserPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, User> {
         return try {
-            val currentPage = params.key ?: 0
-            // TODO get total pages from response
-            val totalPages = 99
+            val lastUserId = params.key ?: 0
+            val perPage = DEFAULT_PAGE_SIZE
             val response = api.getListUser(
-                since = currentPage * DEFAULT_PAGE_SIZE,
-                perPage = DEFAULT_PAGE_SIZE
+                since = lastUserId,
+                perPage = perPage
             )
             if (response.isSuccessful) {
+                val users = response.body().orEmpty().map { it.toDomainModel() }
                 LoadResult.Page(
-                    response.body().orEmpty().map { it.toDomainModel() },
-                    prevKey = if (currentPage == 0) null else currentPage - 1,
-                    nextKey = if (currentPage < totalPages) currentPage + 1 else null
+                    data = users,
+                    prevKey = null,
+                    nextKey = users.lastOrNull()?.id
                 )
             } else {
                 LoadResult.Error(Exception(response.message()))
@@ -39,7 +39,7 @@ class ListUserPagingSource(
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 30
-        const val INITIAL_LOAD_SIZE = 20
+        const val INITIAL_LOAD_SIZE = 60
         const val PROFILE_IMAGE_CACHE_RESOLUTION = 500
     }
 }

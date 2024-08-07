@@ -49,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -123,13 +124,45 @@ fun SearchBar() {
 
 @Composable
 fun ListOutlet(users: LazyPagingItems<User>) {
-    LazyColumn() {
+    LazyColumn {
         items(
-            users.itemCount
+            count = users.itemCount,
+            key = { index -> users[index]?.id ?: index }
         ) { index ->
             val outlet = users[index]
             outlet?.let {
                 UserItem(it)
+            }
+        }
+        users.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item { LoadingItem() }
+                }
+
+                loadState.append is LoadState.Loading -> {
+                    item { LoadingItem() }
+                }
+
+                loadState.refresh is LoadState.Error -> {
+                    val e = loadState.refresh as LoadState.Error
+                    item {
+                        ErrorItem(
+                            message = e.error.localizedMessage!!,
+                            onRetryClick = { retry() }
+                        )
+                    }
+                }
+
+                loadState.append is LoadState.Error -> {
+                    val e = loadState.append as LoadState.Error
+                    item {
+                        ErrorItem(
+                            message = e.error.localizedMessage!!,
+                            onRetryClick = { retry() }
+                        )
+                    }
+                }
             }
         }
     }
