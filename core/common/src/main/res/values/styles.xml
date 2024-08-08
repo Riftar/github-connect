@@ -43,6 +43,10 @@
         <item name="android:textColor">@color/nero_grey</item>
     </style>
 
+    <style name="Caption.Medium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <!--    Styles bottomsheet-->
     <style name="RoundedTopCornerBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/RoundedTopCornerBottomSheetModalStyle</item>
@@ -52,5 +56,11 @@
     <style name="RoundedTopCornerBottomSheetModalStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bg_bottom_sheet</item>
         <item name="android:backgroundTint">@color/white</item>
+    </style>
+
+    <!--    Styles for imageview-->
+    <style name="circleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

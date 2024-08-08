@@ -1,12 +1,13 @@
 package com.riftar.listuser
 
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -33,11 +34,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +53,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
+import com.riftar.common.constant.NavigationConstant.USER_DETAIL_ACTIVITY
 import com.riftar.common.ui.theme.GithubConnectTheme
 import com.riftar.domain.listuser.model.User
 import org.koin.androidx.compose.koinViewModel
@@ -64,9 +66,11 @@ class ListUserActivity : ComponentActivity() {
         setContent {
             GithubConnectTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ListUserScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Surface(color = Color.White) {
+                        ListUserScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                 }
             }
         }
@@ -170,6 +174,7 @@ fun ListOutlet(users: LazyPagingItems<User>) {
 
 @Composable
 fun UserItem(user: User) {
+    val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -180,7 +185,7 @@ fun UserItem(user: User) {
                 width = 1.dp,
                 color = Color.DarkGray,
                 shape = MaterialTheme.shapes.medium
-            )
+            ), onClick = { navigateToUserDetail(context, user.userName) }
     ) {
         Row(
             Modifier
@@ -208,6 +213,12 @@ fun UserItem(user: User) {
             }
         }
     }
+}
+
+fun navigateToUserDetail(context: Context, userName: String) {
+    val intent = Intent(context, Class.forName(USER_DETAIL_ACTIVITY))
+    intent.putExtra(USERNAME_INTENT, userName)
+    context.startActivity(intent)
 }
 
 @Composable

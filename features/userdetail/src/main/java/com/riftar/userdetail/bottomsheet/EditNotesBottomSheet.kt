@@ -5,12 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.riftar.userdetail.UserDetailViewModel
 import com.riftar.userdetail.databinding.LayoutEditNotesBottomsheetBinding
 
 class EditNotesBottomSheet : BottomSheetDialogFragment() {
-    private var initialNotes: String = ""
     lateinit var binding: LayoutEditNotesBottomsheetBinding
+    private val viewModel: UserDetailViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -28,33 +30,32 @@ class EditNotesBottomSheet : BottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
     }
 
-//    private fun setViewListener() {
-//        with(binding) {
-//            ivClose.setOnClickWithThrottle {
-//                dismiss()
-//            }
-//            ivBack.setOnClickWithThrottle {
-//                dismiss()
-//            }
-//            btnNext.setOnClickWithThrottle {
-//                if (isFormValid()) {
-//                    val url = "https://api.whatsapp.com/send?phone=+${etPhoneNumber.text}&text=${etMessage.text}"
-//                    val intent = Intent(Intent.ACTION_VIEW).apply {
-//                        data = Uri.parse(url)
-//                    }
-//                    startActivity(intent)
-//                }
-//            }
-//        }
-//    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setViewListener()
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+    }
+
+    private fun setViewListener() {
+        with(binding) {
+            ivBack.setOnClickListener {
+                dismiss()
+            }
+            btnSave.setOnClickListener {
+                val text = etNotes.text.toString()
+                if (text.isNotEmpty()) {
+                    viewModel.saveNotes(text)
+                }
+            }
+        }
+    }
 
     companion object {
-        fun newInstance(
-            initialNotes: String
-        ): EditNotesBottomSheet {
-            return EditNotesBottomSheet().apply {
-                this.initialNotes = initialNotes
-            }
+        fun newInstance(): EditNotesBottomSheet {
+            return EditNotesBottomSheet()
         }
     }
 }

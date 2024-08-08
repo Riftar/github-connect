@@ -1,34 +1,62 @@
 package com.riftar.userdetail
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
+import coil.load
+import com.riftar.common.base.BaseActivity
+import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
+import com.riftar.common.helper.setOrHide
+import com.riftar.domain.userdetail.model.UserDetail
+import com.riftar.userdetail.bottomsheet.EditNotesBottomSheet
 import com.riftar.userdetail.databinding.ActivityUserDetailBinding
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class UserDetailActivity : AppCompatActivity() {
-    lateinit var binding: ActivityUserDetailBinding
-    private var toolbar: Toolbar? = null
+class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
+    private val viewModel: UserDetailViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityUserDetailBinding.inflate(layoutInflater)
-        toolbar = binding.toolbar
         setContentView(binding.root)
-//        setupToolbar(toolbar)
-//        initViewListener()
-//        observeViewModel()
-//        setupView()
+
+        val userName = intent.getStringExtra(USERNAME_INTENT).orEmpty()
+        viewModel.getUserDetail(userName)
     }
 
-    private fun setupToolbar(toolbar: Toolbar?) {
-        if (toolbar != null) {
-            setSupportActionBar(toolbar)
-            supportActionBar?.let {
-                it.setHomeAsUpIndicator(R.drawable.ic_arrow_back)
-                it.setDisplayHomeAsUpEnabled(true)
-                it.setHomeButtonEnabled(true)
+    override fun getViewBinding() = ActivityUserDetailBinding.inflate(layoutInflater)
+    override fun initToolbar() = binding.toolbar
+
+    override fun observeViewModel() {
+        viewModel.userDetail.observe(this) { userDetail ->
+            showData(userDetail)
+        }
+        viewModel.isLoading.observe(this) { isLoading ->
+            if (isLoading) showLoadingDialog() else hideLoadingDialog()
+        }
+        viewModel.errorMessage.observe(this) { errorMsg ->
+            showErrorSnackBar(errorMsg)
+        }
+    }
+
+    override fun initViewListener() {
+        with(binding) {
+            ivEditNotes.setOnClickListener {
+                EditNotesBottomSheet
+                    .newInstance()
+                    .show(supportFragmentManager, EditNotesBottomSheet::class.java.toString())
             }
-            toolbar.setTitleTextAppearance(this, com.riftar.common.R.style.Title)
-            toolbar.setNavigationOnClickListener { finish() }
+        }
+    }
+
+    private fun showData(userDetail: UserDetail) {
+        with(binding) {
+            ivAvatar.load(userDetail.avatarUrl)
+            tvUserName.text = userDetail.userName
+            tvFullName.text = userDetail.name
+            tvBio.setOrHide(userDetail.bio)
+            tvBio.setOrHide(userDetail.bio)
+            tvFollowers.text = getString(R.string.title_followers, userDetail.followers)
+            tvFollowing.text = getString(R.string.title_following, userDetail.following)
+            tvBlog.setOrHide(userDetail.blog)
+            tvCompany.setOrHide(userDetail.company)
+            tvLocation.setOrHide(userDetail.location)
         }
     }
 }
