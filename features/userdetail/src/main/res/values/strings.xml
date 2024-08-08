@@ -1,0 +1,5 @@
+<resources>
+    <string name="title_followers">%d Followers</string>
+    <string name="title_following">%d Following</string>
+    <string name="title_notes">Notes</string>
+</resources>

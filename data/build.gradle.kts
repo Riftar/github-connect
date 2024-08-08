@@ -50,6 +50,7 @@ dependencies {
 
     api(libs.retrofit)
     api(libs.okHttp)
+    api(libs.koin.compose)
     implementation(libs.okHttpLoggingInterceptor)
     implementation(libs.paging.compose)
     implementation(libs.retrofit.gson.converter)

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--    Styles for text-->
+    <style name="Title">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/nero_grey</item>
+    </style>
+
+    <style name="Subhead">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/nero_grey</item>
+    </style>
+
+    <style name="Subhead.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Subhead.Medium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Body">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/nero_grey</item>
+    </style>
+
+    <style name="Body.DarkGrey">
+        <item name="android:textColor">@color/dark_grey</item>
+    </style>
+
+    <style name="Body.Medium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Body.Bold">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/nero_grey</item>
+    </style>
+
+    <style name="Caption.Medium">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!--    Styles bottomsheet-->
+    <style name="RoundedTopCornerBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/RoundedTopCornerBottomSheetModalStyle</item>
+        <item name="android:backgroundDimAmount">0.4</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
+    <style name="RoundedTopCornerBottomSheetModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_bottom_sheet</item>
+        <item name="android:backgroundTint">@color/white</item>
+    </style>
+
+    <!--    Styles for imageview-->
+    <style name="circleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+</resources>
