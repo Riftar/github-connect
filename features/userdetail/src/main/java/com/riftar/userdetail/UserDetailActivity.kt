@@ -43,6 +43,25 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
                     .show(supportFragmentManager, EditNotesBottomSheet::class.java.toString())
             }
         }
+        setTitleVisibilityOnScroll()
+    }
+
+    private fun setTitleVisibilityOnScroll() {
+        val userName = intent.getStringExtra(USERNAME_INTENT).orEmpty()
+        var isShow = true
+        var scrollRange = -1
+        binding.appbar.addOnOffsetChangedListener { barLayout, verticalOffset ->
+            if (scrollRange == -1) {
+                scrollRange = barLayout?.totalScrollRange!!
+            }
+            if (scrollRange + verticalOffset == 0) {
+                binding.collapsingToolbar.title = userName
+                isShow = true
+            } else if (isShow) {
+                binding.collapsingToolbar.title = " "
+                isShow = false
+            }
+        }
     }
 
     private fun showData(userDetail: UserDetail) {

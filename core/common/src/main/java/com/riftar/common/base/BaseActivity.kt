@@ -59,8 +59,9 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
                 it.setHomeAsUpIndicator(R.drawable.ic_arrow_back)
                 it.setDisplayHomeAsUpEnabled(true)
                 it.setHomeButtonEnabled(true)
+                // Hide title text
+                it.setDisplayShowTitleEnabled(false)
             }
-            toolbar.setTitleTextAppearance(this, R.style.Title)
             toolbar.setNavigationOnClickListener { finish() }
         }
     }

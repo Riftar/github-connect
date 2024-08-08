@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--    TODO Need to do some renaming since the colors value is now different between night and day-->
+<!--    TODO Need to do some renaming since the colors value is now different between night and day-->
     <color name="primary_color">@color/observatory_green</color>
     <color name="primary_variant_color">#4CC7A1</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FFFFFF</color>
+<!--    Nero for night theme-->
+    <color name="white">#262626</color>
     <color name="transparent">#00000000</color>
-    <color name="white_smoke_white">#F6F6F6</color>
-    <color name="nero_grey">#262626</color>
+<!--    gainsboro_white for night theme-->
+    <color name="white_smoke_white">#D9D9D9</color>
+    <!--    white_smoke_white for night theme-->
+    <color name="nero_grey">#F6F6F6</color>
     <color name="amaranth_red">#E11D48</color>
     <color name="observatory_green">#038767</color>
     <color name="empress_grey">#737373</color>
@@ -28,7 +31,8 @@
     <color name="cosmic_latte_white">#DBF8DD</color>
     <color name="green_green">#008503</color>
     <color name="jogged_ice_green">#CDE7E1</color>
-    <color name="bubbles_green">#F3F9F7</color>
+<!--    Dark grey for night theme-->
+    <color name="bubbles_green">#A3A3A3</color>
     <color name="white_white">#FAFAFA</color>
     <color name="mango_tango_orange">#D97706</color>
     <color name="floral_white_white">#FFFBEB</color>
