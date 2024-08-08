@@ -6,12 +6,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.domain.userdetail.usecase.GetUserDetailUseCase
+import com.riftar.domain.userdetail.usecase.SaveNotesUseCase
 import kotlinx.coroutines.launch
 
-class UserDetailViewModel(private val getUserDetailUseCase: GetUserDetailUseCase) : ViewModel() {
+class UserDetailViewModel(
+    private val getUserDetailUseCase: GetUserDetailUseCase,
+    private val saveNotesUseCase: SaveNotesUseCase
+) : ViewModel() {
     private val _user = MutableLiveData<UserDetail>()
     val userDetail: LiveData<UserDetail>
         get() = _user
+    private val _isSaveNoteSuccess = MutableLiveData<Boolean>()
+    val isSaveNoteSuccess: LiveData<Boolean>
+        get() = _isSaveNoteSuccess
+
     val isLoading: LiveData<Boolean>
         get() = mIsLoading
     private val mIsLoading = MutableLiveData<Boolean>()
@@ -19,10 +27,10 @@ class UserDetailViewModel(private val getUserDetailUseCase: GetUserDetailUseCase
         get() = mErrorMessage
     private val mErrorMessage = MutableLiveData<String>()
 
-    fun getUserDetail(userName: String) {
+    fun getUserDetail(userId: Int, userName: String) {
         viewModelScope.launch {
             mIsLoading.value = true
-            val result = getUserDetailUseCase.invoke(userName)
+            val result = getUserDetailUseCase.invoke(userId, userName)
             result.onSuccess { data ->
                 _user.value = data
             }.onFailure { exception ->
@@ -33,6 +41,16 @@ class UserDetailViewModel(private val getUserDetailUseCase: GetUserDetailUseCase
     }
 
     fun saveNotes(notes: String) {
-//        TODO("Not yet implemented")
+        viewModelScope.launch {
+            mIsLoading.value = true
+            val result = saveNotesUseCase.invoke(userDetail.value?.id ?: 0, notes)
+            result.onSuccess { isSuccess ->
+                _isSaveNoteSuccess.value = isSuccess
+            }.onFailure { exception ->
+                _isSaveNoteSuccess.value = false
+                mErrorMessage.value = exception.message
+            }
+            mIsLoading.value = false
+        }
     }
 }

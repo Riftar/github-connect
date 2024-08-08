@@ -4,7 +4,10 @@ import android.os.Bundle
 import coil.load
 import com.riftar.common.base.BaseActivity
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
+import com.riftar.common.constant.NavigationConstant.USER_ID_INTENT
+import com.riftar.common.helper.setGone
 import com.riftar.common.helper.setOrHide
+import com.riftar.common.helper.showOrHide
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.userdetail.bottomsheet.EditNotesBottomSheet
 import com.riftar.userdetail.databinding.ActivityUserDetailBinding
@@ -16,8 +19,9 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        val userId = intent.getIntExtra(USER_ID_INTENT, 0)
         val userName = intent.getStringExtra(USERNAME_INTENT).orEmpty()
-        viewModel.getUserDetail(userName)
+        viewModel.getUserDetail(userId, userName)
     }
 
     override fun getViewBinding() = ActivityUserDetailBinding.inflate(layoutInflater)
@@ -39,7 +43,12 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
         with(binding) {
             ivEditNotes.setOnClickListener {
                 EditNotesBottomSheet
-                    .newInstance()
+                    .newInstance { notes ->
+                        with(binding) {
+                            tvNotesPlaceholder.showOrHide(notes.isEmpty())
+                            tvNotes.setOrHide(notes)
+                        }
+                    }
                     .show(supportFragmentManager, EditNotesBottomSheet::class.java.toString())
             }
         }
@@ -55,10 +64,10 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
                 scrollRange = barLayout?.totalScrollRange!!
             }
             if (scrollRange + verticalOffset == 0) {
-                binding.collapsingToolbar.title = userName
+                binding.toolbarTitle.setOrHide(userName)
                 isShow = true
             } else if (isShow) {
-                binding.collapsingToolbar.title = " "
+                binding.toolbarTitle.setGone()
                 isShow = false
             }
         }
@@ -76,6 +85,8 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
             tvBlog.setOrHide(userDetail.blog)
             tvCompany.setOrHide(userDetail.company)
             tvLocation.setOrHide(userDetail.location)
+            tvNotesPlaceholder.showOrHide(userDetail.notes.isEmpty())
+            tvNotes.setOrHide(userDetail.notes)
         }
     }
 }

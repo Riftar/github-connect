@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.withTransaction
 import com.riftar.data.common.database.AppDatabase
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toEntity
@@ -35,13 +34,11 @@ class ListUserRemoteMediator(
 
             val response = api.getListUser(since = loadKey ?: 0, perPage = state.config.pageSize)
 
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    userDao.clearAll()
-                }
-                val users = response.body().orEmpty().map { it.toEntity() }
-                userDao.insertAll(users)
+            if (loadType == LoadType.REFRESH) {
+                userDao.clearAll()
             }
+            val users = response.body().orEmpty().map { it.toEntity() }
+            userDao.insertAll(users)
 
             MediatorResult.Success(
                 endOfPaginationReached = response.body().orEmpty().isEmpty()

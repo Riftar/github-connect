@@ -9,6 +9,8 @@ import com.riftar.data.common.database.AppDatabase
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toDomainModel
 import com.riftar.data.listuser.pagingsource.ListUserPagingSource
+import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.DEFAULT_PAGE_SIZE
+import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.INITIAL_LOAD_SIZE
 import com.riftar.data.listuser.remotemediator.ListUserRemoteMediator
 import com.riftar.domain.listuser.model.User
 import com.riftar.domain.listuser.repository.ListUserRepository
@@ -30,7 +32,11 @@ class ListUserRepositoryImpl(private val api: ListUserAPI, private val database:
             pagingSourceFactory = { database.getListUserDao().pagingSource() },
             remoteMediator = ListUserRemoteMediator(api, database)
         ).flow.map { pagingData ->
-            pagingData.map { it.toDomainModel() }
+            val notesDao = database.getNotesDao()
+            pagingData.map { userEntity ->
+                val notes = notesDao.getNotesByUserId(userEntity.id)
+                userEntity.toDomainModel(notes != null)
+            }
         }
     }
 
@@ -47,11 +53,5 @@ class ListUserRepositoryImpl(private val api: ListUserAPI, private val database:
             enablePlaceholders = false,
             initialLoadSize = INITIAL_LOAD_SIZE
         )
-    }
-
-    companion object {
-        const val DEFAULT_PAGE_SIZE = 30
-        const val INITIAL_LOAD_SIZE = 60
-        const val PROFILE_IMAGE_CACHE_RESOLUTION = 500
     }
 }

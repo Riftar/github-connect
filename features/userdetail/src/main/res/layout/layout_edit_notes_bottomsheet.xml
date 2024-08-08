@@ -52,8 +52,7 @@
             android:ellipsize="end"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
-            android:lines="4"
-            android:maxLength="500" />
+            android:lines="5" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button

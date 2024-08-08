@@ -34,7 +34,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,6 +58,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
 import com.riftar.common.constant.NavigationConstant.USER_DETAIL_ACTIVITY
+import com.riftar.common.constant.NavigationConstant.USER_ID_INTENT
 import com.riftar.common.ui.theme.GithubConnectTheme
 import com.riftar.domain.listuser.model.User
 import com.valentinilk.shimmer.shimmer
@@ -188,7 +188,7 @@ fun UserItem(user: User) {
                 width = 1.dp,
                 color = Color.DarkGray,
                 shape = MaterialTheme.shapes.medium
-            ), onClick = { navigateToUserDetail(context, user.userName) }
+            ), onClick = { navigateToUserDetail(context, user.id, user.userName) }
     ) {
         Row(
             Modifier
@@ -211,15 +211,16 @@ fun UserItem(user: User) {
                 Text(text = user.htmlUrl, style = MaterialTheme.typography.bodySmall)
             }
 
-            IconButton(modifier = Modifier.weight(1f), onClick = { /*TODO*/ }) {
+            if (user.hasNotes) {
                 Icon(Icons.AutoMirrored.Outlined.StickyNote2, contentDescription = "note icon")
             }
         }
     }
 }
 
-fun navigateToUserDetail(context: Context, userName: String) {
+fun navigateToUserDetail(context: Context, userId: Int, userName: String) {
     val intent = Intent(context, Class.forName(USER_DETAIL_ACTIVITY))
+    intent.putExtra(USER_ID_INTENT, userId)
     intent.putExtra(USERNAME_INTENT, userName)
     context.startActivity(intent)
 }
