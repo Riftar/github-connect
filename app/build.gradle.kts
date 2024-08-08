@@ -1,8 +1,7 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -46,7 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.1" //Need to match Kotlin version
     }
     packaging {
         resources {
@@ -62,6 +61,8 @@ dependencies {
     implementation(project(":features:listuser"))
     implementation(project(":features:userdetail"))
 
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.koin.compose)
     implementation(libs.paging.compose)
     implementation(libs.androidx.core.ktx)
