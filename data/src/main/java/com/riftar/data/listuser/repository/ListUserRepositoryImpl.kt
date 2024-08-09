@@ -15,8 +15,12 @@ import com.riftar.data.listuser.remotemediator.ListUserRemoteMediator
 import com.riftar.data.listuser.room.dao.ListUserDao
 import com.riftar.domain.listuser.model.User
 import com.riftar.domain.listuser.repository.ListUserRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
+import java.io.IOException
 
 class ListUserRepositoryImpl(
     private val api: ListUserAPI,
@@ -32,34 +36,82 @@ class ListUserRepositoryImpl(
      */
     @OptIn(ExperimentalPagingApi::class)
     override fun getListUserRemoteMediator(): Flow<PagingData<User>> {
+        // 1. Fetch data through remote mediator and save to database
         return Pager(
             config = getDefaultPageConfig(),
             pagingSourceFactory = { listUserDao.pagingSource() },
             remoteMediator = ListUserRemoteMediator(api, listUserDao)
         ).flow.map { pagingData ->
+            // 2. Map the data to domain model, add notes flag if user has notes
             pagingData.map { userEntity ->
                 val notes = notesDao.getNotesByUserId(userEntity.id)
                 userEntity.toDomainModel(notes != null)
             }
+        }.retryWhen { cause, attempt ->
+            // 3. Retry the flow when IOException is thrown and the attempt count is less than 3
+            if (cause is IOException && attempt < 3) {
+                val delay = 1000 * (attempt + 1)
+                delay(delay)
+                return@retryWhen true
+            } else {
+                emit(PagingData.empty())
+                return@retryWhen false
+            }
+        }.catch { e ->
+            emit(PagingData.empty())
         }
     }
 
+    // TODO delete
     override fun getListUser(): Flow<PagingData<User>> {
+        // 1. Fetch data through paging source and save to database
         return Pager(
             config = getDefaultPageConfig(),
             pagingSourceFactory = { ListUserPagingSource(api, listUserDao) }
-        ).flow
+        ).flow.map { pagingData ->
+            // 2. Add notes flag if user has notes
+            pagingData.map { user ->
+                val notes = notesDao.getNotesByUserId(user.id)
+                user.copy(hasNotes = notes != null)
+            }
+        }.retryWhen { cause, attempt ->
+            // 3. Retry the flow when IOException is thrown and the attempt count is less than 3
+            if (cause is IOException && attempt < 3) {
+                val delay = 1000 * (attempt + 1)
+                delay(delay)
+                return@retryWhen true
+            } else {
+                emit(PagingData.empty())
+                return@retryWhen false
+            }
+        }.catch { e ->
+            emit(PagingData.empty())
+        }
     }
 
     override fun getListUserByQuery(query: String): Flow<PagingData<User>> {
+        // 1. Fetch from database based on query
         return Pager(
             config = getDefaultPageConfig(),
             pagingSourceFactory = { listUserDao.getListUserByQuery(query) }
         ).flow.map { pagingData ->
+            // 2. Map the data to domain model, add notes flag if user has notes
             pagingData.map { userEntity ->
                 val notes = notesDao.getNotesByUserId(userEntity.id)
                 userEntity.toDomainModel(notes != null)
             }
+        }.retryWhen { cause, attempt ->
+            // 3. Retry the flow when IOException is thrown and the attempt count is less than 3
+            if (cause is IOException && attempt < 3) {
+                val delay = 1000 * (attempt + 1)
+                delay(delay)
+                return@retryWhen true
+            } else {
+                emit(PagingData.empty())
+                return@retryWhen false
+            }
+        }.catch { e ->
+            emit(PagingData.empty())
         }
     }
 

@@ -48,7 +48,7 @@ class NetworkErrorInterceptor(context: Context) : Interceptor {
     }
 }
 
-class NoInternetException(private val errorMessage: String = "No connection!") : IOException() {
+class NoInternetException(private val errorMessage: String = "No internet connection!") : IOException() {
     // You can send any message whatever you want from here.
     override val message: String
         get() = errorMessage
