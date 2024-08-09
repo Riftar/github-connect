@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
@@ -84,20 +86,22 @@ class ListUserActivity : ComponentActivity() {
 @Composable
 fun ListUserScreen(modifier: Modifier = Modifier) {
     val viewModel: ListUserViewModel = koinViewModel()
+    val users = viewModel.getListUser().collectAsLazyPagingItems()
+
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        SearchBar(viewModel)
-        ListOutlet(viewModel)
+        SearchBar(onSearchQueryChange = { viewModel.setSearchQuery(it) })
+        ListUser(users)
     }
 }
 
 @Composable
-fun SearchBar(viewModel: ListUserViewModel) {
+fun SearchBar(onSearchQueryChange: (String) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     OutlinedTextField(
         value = query,
         onValueChange = { newQuery ->
             query = newQuery
-            viewModel.setSearchQuery(query)
+            onSearchQueryChange.invoke(newQuery)
         },
         label = { },
         placeholder = { Text(text = "Search by username", fontSize = 16.sp) },
@@ -113,6 +117,7 @@ fun SearchBar(viewModel: ListUserViewModel) {
                     modifier = Modifier
                         .clickable {
                             query = ""
+                            onSearchQueryChange.invoke("")
                         }
                         .size(16.dp)
                 )
@@ -123,8 +128,7 @@ fun SearchBar(viewModel: ListUserViewModel) {
 }
 
 @Composable
-fun ListOutlet(viewModel: ListUserViewModel) {
-    val users = viewModel.getListUser().collectAsLazyPagingItems()
+fun ListUser(users: LazyPagingItems<User>) {
     LazyColumn {
         items(
             count = users.itemCount,
@@ -164,8 +168,37 @@ fun ListOutlet(viewModel: ListUserViewModel) {
                         )
                     }
                 }
+
+                loadState.refresh.endOfPaginationReached && users.itemCount == 0 -> {
+                    item { EmptyView() }
+                }
+
+                loadState.append.endOfPaginationReached && users.itemCount == 0 -> {
+                    item { EmptyView() }
+                }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyView() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .height(200.dp)
+    ) {
+        Text(
+            text = "No user found",
+            style = MaterialTheme.typography.titleSmall
+        )
+        Text(
+            text = "Try adjusting your search",
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 

@@ -25,7 +25,7 @@ class ListUserViewModel(private val getListUserUseCase: GetListUserUseCase) : Vi
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     fun getListUser(): Flow<PagingData<User>> {
         return _searchQuery
-            .debounce(1500)
+            .debounce(1000)
             .flatMapLatest { query ->
                 getListUserUseCase.invoke(query)
             }
