@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,12 +48,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
@@ -85,27 +88,25 @@ class ListUserActivity : ComponentActivity() {
 @Composable
 fun ListUserScreen(modifier: Modifier = Modifier) {
     val viewModel: ListUserViewModel = koinViewModel()
+    val users = viewModel.getListUser().collectAsLazyPagingItems()
+
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        SearchBar()
-        ListOutlet(viewModel)
+        SearchBar(onSearchQueryChange = { viewModel.setSearchQuery(it) })
+        ListUser(users)
     }
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(onSearchQueryChange: (String) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
-    val context = LocalContext.current
     OutlinedTextField(
         value = query,
-        onValueChange = {
-            query = it
-            if (query.length > 3) {
-                //TODO search
-                Toast.makeText(context, query, Toast.LENGTH_SHORT).show()
-            }
+        onValueChange = { newQuery ->
+            query = newQuery
+            onSearchQueryChange.invoke(newQuery)
         },
         label = { },
-        placeholder = { Text(text = "Input 3 character to search", fontSize = 14.sp) },
+        placeholder = { Text(text = "Search by username", fontSize = 16.sp) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
@@ -118,6 +119,7 @@ fun SearchBar() {
                     modifier = Modifier
                         .clickable {
                             query = ""
+                            onSearchQueryChange.invoke("")
                         }
                         .size(16.dp)
                 )
@@ -128,16 +130,15 @@ fun SearchBar() {
 }
 
 @Composable
-fun ListOutlet(viewModel: ListUserViewModel) {
-    val users = viewModel.getListUser().collectAsLazyPagingItems()
+fun ListUser(users: LazyPagingItems<User>) {
     LazyColumn {
         items(
             count = users.itemCount,
             key = { index -> users[index]?.id ?: index }
         ) { index ->
-            val outlet = users[index]
-            outlet?.let {
-                UserItem(it)
+            val user = users[index]
+            user?.let {
+                UserItem(it, index)
             }
         }
         users.apply {
@@ -169,14 +170,43 @@ fun ListOutlet(viewModel: ListUserViewModel) {
                         )
                     }
                 }
+
+                loadState.refresh.endOfPaginationReached && users.itemCount == 0 -> {
+                    item { EmptyView() }
+                }
+
+                loadState.append.endOfPaginationReached && users.itemCount == 0 -> {
+                    item { EmptyView() }
+                }
             }
         }
     }
 }
 
+@Composable
+fun EmptyView() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .height(200.dp)
+    ) {
+        Text(
+            text = "No user found",
+            style = MaterialTheme.typography.titleSmall
+        )
+        Text(
+            text = "Try adjusting your search",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(user: User, index: Int) {
     val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
@@ -200,7 +230,8 @@ fun UserItem(user: User) {
                 contentDescription = "user image",
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                colorFilter = createInvertingColorFilter(index)
             )
             Column(
                 modifier = Modifier
@@ -215,6 +246,23 @@ fun UserItem(user: User) {
                 Icon(Icons.AutoMirrored.Outlined.StickyNote2, contentDescription = "note icon")
             }
         }
+    }
+}
+
+/**
+ * Invert color every 4 item
+ */
+fun createInvertingColorFilter(index: Int): ColorFilter? {
+    if ((index + 1) % 4 == 0) {
+        val colorMatrix = floatArrayOf(
+            -1f, 0f, 0f, 0f, 255f,
+            0f, -1f, 0f, 0f, 255f,
+            0f, 0f, -1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f
+        )
+        return ColorFilter.colorMatrix(ColorMatrix(colorMatrix))
+    } else {
+        return null
     }
 }
 

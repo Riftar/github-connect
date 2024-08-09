@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ListUserRepository {
     fun getListUserRemoteMediator(): Flow<PagingData<User>>
     fun getListUser(): Flow<PagingData<User>>
+    fun getListUserByQuery(query: String): Flow<PagingData<User>>
 }
