@@ -9,6 +9,9 @@ import com.riftar.data.userdetail.mapper.toEntity
 import com.riftar.data.userdetail.room.dao.UserDetailDao
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.domain.userdetail.repository.UserDetailRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 
 class UserDetailRepositoryImpl(
     private val api: UserDetailAPI,
@@ -17,52 +20,54 @@ class UserDetailRepositoryImpl(
     private val userDetailDao: UserDetailDao
 ) :
     UserDetailRepository {
-    /***
-     * For supporting offline data, I apply this flow of data:
-     * 1. Get data from API
-     * 2. Save data to local DB
-     * 3. Get UserDetailEntity data from local DB
-     * 4. Get NotesEntity data with corresponding userId from local DB
-     * 5. Insert Notes data into UserDetail
-     */
-    override suspend fun getUserDetail(userId: Int, userName: String): Result<UserDetail> {
-        return try {
+
+    override fun getFlowUserDetail(userId: Int, userName: String): Flow<Result<UserDetail>> = flow {
+        // 1. Emit old data from database if it exists
+        val localData = userDetailDao.getUserDetailById(userId)
+        if (localData != null) {
+            val notes = notesDao.getNotesByUserId(userId)
+            emit(Result.success(localData.toDomainModel(notes?.notes.orEmpty())))
+        }
+
+        // 2. Fetch new data from API and update
+        try {
             val response = api.getUserDetail(userName)
             val result = response.body()
-            if (response.isSuccessful && result?.id !== null) {
+            if (response.isSuccessful && result?.id != null) {
                 val notes = notesDao.getNotesByUserId(result.id)
-
                 userDetailDao.insertAll(result.toEntity())
-                val localData = userDetailDao.getUserDetailById(result.id)
-                Result.success(localData.toDomainModel(notes?.notes.orEmpty()))
 
+                val updatedLocalData = userDetailDao.getUserDetailById(result.id)
+                emit(Result.success(updatedLocalData.toDomainModel(notes?.notes.orEmpty())))
             } else {
-//                throw Exception(response.message())
-                Result.failure(Exception(response.message()))
+                emit(Result.failure(Exception(response.message())))
             }
         } catch (e: Exception) {
-            //TODO Handle offline data
-//            val notes = notesDao.getNotesByUserId(userId)
-//            val localData = userDetailDao.getUserDetailById(userId)
-//            Result.success(localData.toDomainModel(notes?.notes.orEmpty()))
-            Result.failure(e)
+            // 3. Emit error, but don't stop the flow
+            emit(Result.failure(e))
         }
+    }.catch { e ->
+        // This catch block will handle any exceptions thrown in the flow
+        emit(Result.failure(e))
     }
 
-    override suspend fun saveNotes(userId: Int, notes: String): Result<Boolean> {
-        // Save notes to the database
+    override fun saveNotes(userId: Int, notes: String): Flow<Result<Unit>> = flow {
+
+        // 1. Update the hasNotes flag if user exist
+        val userEntity = listUserDao.getUserById(userId)
+        userEntity?.let {
+            listUserDao.updateUser(it.copy(hasNotes = true))
+        }
+        // 2. Save notes to the database
         val notesEntity = notesDao.getNotesByUserId(userId)
-        if (notesEntity != null) {
-            notesDao.updateNotes(notesEntity.copy(notes = notes))
+        val rowsAffected = if (notesEntity != null) {
+            notesDao.updateNotes(notesEntity.copy(notes = notes)).toLong()
         } else notesDao.insertAll(NotesEntity(userId = userId, notes = notes))
 
-        // Update the hasNotes flag
-        val userEntity = listUserDao.getUserById(userId)
-
-        userEntity?.let {
-            val rowsUpdated = listUserDao.updateUser(it.copy(hasNotes = true))
-            if (rowsUpdated > 0) return Result.success(true)
-        }
-        return Result.failure(Exception("Failed to save notes"))
+        // 3. Emit Result
+        if (rowsAffected > 0) emit(Result.success(Unit)) else emit(Result.failure(Exception("Failed to save notes")))
+    }.catch { e ->
+        // This catch block will handle any exceptions thrown in the flow
+        emit(Result.failure(e))
     }
 }

@@ -13,7 +13,7 @@ import com.riftar.data.common.notes.room.entity.NotesEntity.Companion.NOTES_TABL
 interface NotesDao {
     @Transaction
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(notes: NotesEntity)
+    suspend fun insertAll(notes: NotesEntity): Long
 
     @Transaction
     @Update

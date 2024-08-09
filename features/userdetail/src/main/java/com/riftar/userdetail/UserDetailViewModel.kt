@@ -1,56 +1,65 @@
 package com.riftar.userdetail
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.domain.userdetail.usecase.GetUserDetailUseCase
 import com.riftar.domain.userdetail.usecase.SaveNotesUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserDetailViewModel(
     private val getUserDetailUseCase: GetUserDetailUseCase,
     private val saveNotesUseCase: SaveNotesUseCase
 ) : ViewModel() {
-    private val _user = MutableLiveData<UserDetail>()
-    val userDetail: LiveData<UserDetail>
-        get() = _user
-    private val _isSaveNoteSuccess = MutableLiveData<Boolean>()
-    val isSaveNoteSuccess: LiveData<Boolean>
-        get() = _isSaveNoteSuccess
+    private val _userDetailState = MutableStateFlow<UserDetailState>(UserDetailState.Loading)
+    val userDetailState: StateFlow<UserDetailState> = _userDetailState.asStateFlow()
 
-    val isLoading: LiveData<Boolean>
-        get() = mIsLoading
-    private val mIsLoading = MutableLiveData<Boolean>()
-    val errorMessage: LiveData<String>
-        get() = mErrorMessage
-    private val mErrorMessage = MutableLiveData<String>()
+    private val _saveNotesState = MutableStateFlow<SaveNotesState>(SaveNotesState.Initial)
+    val saveNotesState: StateFlow<SaveNotesState> = _saveNotesState.asStateFlow()
 
-    fun getUserDetail(userId: Int, userName: String) {
+    fun getFlowUserDetail(userId: Int, userName: String) {
         viewModelScope.launch {
-            mIsLoading.value = true
-            val result = getUserDetailUseCase.invoke(userId, userName)
-            result.onSuccess { data ->
-                _user.value = data
-            }.onFailure { exception ->
-                mErrorMessage.value = exception.message
-            }
-            mIsLoading.value = false
+            _userDetailState.value = UserDetailState.Loading
+            getUserDetailUseCase.invoke(userId, userName)
+                .collect { result ->
+                    result.onSuccess { data ->
+                        _userDetailState.value = UserDetailState.Success(data)
+                    }.onFailure { exception ->
+                        _userDetailState.value =
+                            UserDetailState.Error(exception.message ?: "Unknown error occurred")
+                    }
+                }
         }
     }
 
-    fun saveNotes(notes: String) {
+    fun saveNotes(userId: Int, notes: String) {
         viewModelScope.launch {
-            mIsLoading.value = true
-            val result = saveNotesUseCase.invoke(userDetail.value?.id ?: 0, notes)
-            result.onSuccess { isSuccess ->
-                _isSaveNoteSuccess.value = isSuccess
-            }.onFailure { exception ->
-                _isSaveNoteSuccess.value = false
-                mErrorMessage.value = exception.message
-            }
-            mIsLoading.value = false
+            _saveNotesState.value = SaveNotesState.Loading
+            saveNotesUseCase.invoke(userId, notes)
+                .collect { result ->
+                    result.onSuccess {
+                        _saveNotesState.value = SaveNotesState.Success("Success add note!")
+                    }.onFailure { exception ->
+                        _saveNotesState.value =
+                            SaveNotesState.Error(exception.message ?: "Unknown error occurred")
+                    }
+                }
         }
     }
+}
+
+sealed class UserDetailState {
+    data object Loading : UserDetailState()
+    data class Success(val userDetail: UserDetail) : UserDetailState()
+    data class Error(val message: String) : UserDetailState()
+}
+
+sealed class SaveNotesState {
+    data object Initial : SaveNotesState()
+    data object Loading : SaveNotesState()
+    data class Success(val message: String) : SaveNotesState()
+    data class Error(val message: String) : SaveNotesState()
 }
