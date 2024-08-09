@@ -36,18 +36,17 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
                 when (state) {
                     is UserDetailState.Loading -> {
                         // Show loading indicator
-                        showLoadingDialog()
+                        setShimmerVisibility(true)
                     }
 
                     is UserDetailState.Success -> {
                         // Update UI with user details
-                        hideLoadingDialog()
+                        setShimmerVisibility(false)
                         showData(state.userDetail)
                     }
 
                     is UserDetailState.Error -> {
                         // Show error message
-                        hideLoadingDialog()
                         showErrorSnackBar(state.message)
                     }
                 }
@@ -86,6 +85,11 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
                 isShow = false
             }
         }
+    }
+
+    private fun setShimmerVisibility(isVisible: Boolean) {
+        binding.layoutShimmer.root.showOrHide(isVisible)
+        binding.scrollView.showOrHide(!isVisible)
     }
 
     private fun showData(userDetail: UserDetail) {

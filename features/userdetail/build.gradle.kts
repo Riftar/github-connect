@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":core:common"))
 
+    implementation(libs.shimmer)
     implementation(libs.coil)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.core.ktx)
