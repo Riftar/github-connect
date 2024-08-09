@@ -61,6 +61,7 @@ dependencies {
     implementation(project(":features:listuser"))
     implementation(project(":features:userdetail"))
 
+    implementation(libs.coil)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.koin.compose)
