@@ -2,7 +2,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:background="@color/white">
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:indicatorColor="@color/nero_grey"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivBack"
@@ -21,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Edit Notes"
+        android:text="@string/title_edit_notes"
         app:layout_constraintStart_toEndOf="@+id/ivBack"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -40,10 +53,9 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:paddingVertical="8dp"
-        app:boxStrokeColor="@color/primary_color"
-        app:hintTextColor="@color/observatory_green"
-        app:layout_constraintTop_toBottomOf="@id/viewSeparator"
-        app:placeholderText="62xxx">
+        app:boxStrokeColor="@color/nero_grey"
+        app:hintTextColor="@color/nero_grey"
+        app:layout_constraintTop_toBottomOf="@id/viewSeparator">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etNotes"
@@ -52,16 +64,16 @@
             android:ellipsize="end"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
-            android:lines="4"
-            android:maxLength="500" />
+            android:lines="5" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btnSave"
+        style="@style/Primary.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Save"
+        android:text="@string/action_save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

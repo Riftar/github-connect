@@ -4,11 +4,15 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.snackbar.Snackbar
 import com.riftar.common.R
+import com.riftar.common.constant.ViewConstant
 import com.riftar.common.databinding.LayoutSnackbarBinding
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
@@ -66,13 +70,34 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
         }
     }
 
+    protected fun showSuccessSnackBar(message: String) {
+        showErrorSnackBar(
+            message = message,
+            icon = R.drawable.ic_check,
+            color = R.color.observatory_green
+        )
+    }
+
+
     @SuppressLint("RestrictedApi")
     protected fun showErrorSnackBar(
-        message: String = "Unknown Error",
+        message: String = ViewConstant.SNACKBAR_DEFAULT_MESSAGE,
+        @DrawableRes icon: Int = R.drawable.ic_warning,
+        @ColorRes color: Int = R.color.amaranth_red
     ) {
-        val snackBar = Snackbar.make(findViewById(android.R.id.content), message, 5000)
+        val snackBar = Snackbar.make(
+            findViewById(android.R.id.content),
+            message,
+            ViewConstant.SNACKBAR_DURATION
+        )
         val customSnackBarBinding = LayoutSnackbarBinding.inflate(LayoutInflater.from(this))
         with(customSnackBarBinding) {
+            cardViewSnackBar.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    binding.root.context, color
+                )
+            )
+            ivIcon.setImageResource(icon)
             tvMessage.text = message
             ivAction.setOnClickListener {
                 snackBar.dismiss()

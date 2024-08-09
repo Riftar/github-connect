@@ -4,6 +4,8 @@ package com.riftar.data.userdetail.model
 import com.google.gson.annotations.SerializedName
 
 data class UserDetailResponse(
+    @SerializedName("id")
+    val id: Int? = null,
     @SerializedName("avatar_url")
     val avatarUrl: String? = null,
     @SerializedName("bio")
@@ -18,8 +20,6 @@ data class UserDetailResponse(
     val followers: Int? = null,
     @SerializedName("following")
     val following: Int? = null,
-    @SerializedName("id")
-    val id: Int? = null,
     @SerializedName("location")
     val location: String? = null,
     @SerializedName("login")

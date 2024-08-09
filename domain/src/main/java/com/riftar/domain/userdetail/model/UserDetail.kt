@@ -12,5 +12,6 @@ data class UserDetail(
     val location: String,
     val userName: String,
     val name: String,
-    val twitterUsername: String
+    val twitterUsername: String,
+    val notes: String
 )

@@ -1,46 +1,70 @@
 package com.riftar.userdetail
 
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import com.riftar.common.base.BaseActivity
 import com.riftar.common.constant.NavigationConstant.USERNAME_INTENT
+import com.riftar.common.constant.NavigationConstant.USER_ID_INTENT
+import com.riftar.common.helper.setGone
 import com.riftar.common.helper.setOrHide
+import com.riftar.common.helper.showOrHide
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.userdetail.bottomsheet.EditNotesBottomSheet
 import com.riftar.userdetail.databinding.ActivityUserDetailBinding
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
     private val viewModel: UserDetailViewModel by viewModel()
+    private var userId = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        userId = intent.getIntExtra(USER_ID_INTENT, 0)
         val userName = intent.getStringExtra(USERNAME_INTENT).orEmpty()
-        viewModel.getUserDetail(userName)
+        viewModel.getFlowUserDetail(userId, userName)
     }
 
     override fun getViewBinding() = ActivityUserDetailBinding.inflate(layoutInflater)
     override fun initToolbar() = binding.toolbar
 
     override fun observeViewModel() {
-        viewModel.userDetail.observe(this) { userDetail ->
-            showData(userDetail)
-        }
-        viewModel.isLoading.observe(this) { isLoading ->
-            if (isLoading) showLoadingDialog() else hideLoadingDialog()
-        }
-        viewModel.errorMessage.observe(this) { errorMsg ->
-            showErrorSnackBar(errorMsg)
+        lifecycleScope.launch {
+            viewModel.userDetailState.collect { state ->
+                when (state) {
+                    is UserDetailState.Loading -> {
+                        // Show loading indicator
+                        showLoadingDialog()
+                    }
+
+                    is UserDetailState.Success -> {
+                        // Update UI with user details
+                        hideLoadingDialog()
+                        showData(state.userDetail)
+                    }
+
+                    is UserDetailState.Error -> {
+                        // Show error message
+                        hideLoadingDialog()
+                        showErrorSnackBar(state.message)
+                    }
+                }
+            }
         }
     }
 
     override fun initViewListener() {
         with(binding) {
             ivEditNotes.setOnClickListener {
-                EditNotesBottomSheet
-                    .newInstance()
-                    .show(supportFragmentManager, EditNotesBottomSheet::class.java.toString())
+                EditNotesBottomSheet.newInstance(userId) { notes, successMessage ->
+                    with(binding) {
+                        tvNotesPlaceholder.showOrHide(notes.isEmpty())
+                        tvNotes.setOrHide(notes)
+                    }
+                    showSuccessSnackBar(successMessage)
+                }.show(supportFragmentManager, EditNotesBottomSheet::class.java.name)
             }
         }
         setTitleVisibilityOnScroll()
@@ -55,10 +79,10 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
                 scrollRange = barLayout?.totalScrollRange!!
             }
             if (scrollRange + verticalOffset == 0) {
-                binding.collapsingToolbar.title = userName
+                binding.toolbarTitle.setOrHide(userName)
                 isShow = true
             } else if (isShow) {
-                binding.collapsingToolbar.title = " "
+                binding.toolbarTitle.setGone()
                 isShow = false
             }
         }
@@ -76,6 +100,8 @@ class UserDetailActivity : BaseActivity<ActivityUserDetailBinding>() {
             tvBlog.setOrHide(userDetail.blog)
             tvCompany.setOrHide(userDetail.company)
             tvLocation.setOrHide(userDetail.location)
+            tvNotesPlaceholder.showOrHide(userDetail.notes.isEmpty())
+            tvNotes.setOrHide(userDetail.notes)
         }
     }
 }

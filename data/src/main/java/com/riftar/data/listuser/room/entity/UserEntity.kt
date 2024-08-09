@@ -10,7 +10,8 @@ data class UserEntity(
     val id: Int,
     val avatarUrl: String?,
     val htmlUrl: String?,
-    val userName: String?
+    val userName: String?,
+    val hasNotes: Boolean = false
 ) {
     companion object {
         const val LIST_USER_TABLE = "list_user"

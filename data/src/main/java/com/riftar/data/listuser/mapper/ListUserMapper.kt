@@ -8,7 +8,8 @@ fun UserResponse.toDomainModel() = User(
     avatarUrl = this.avatarUrl.orEmpty(),
     htmlUrl = this.htmlUrl.orEmpty(),
     id = this.id ?: 0,
-    userName = this.login.orEmpty()
+    userName = this.login.orEmpty(),
+    hasNotes = false
 )
 
 fun UserResponse.toEntity() = UserEntity(
@@ -18,9 +19,10 @@ fun UserResponse.toEntity() = UserEntity(
     userName = this.login
 )
 
-fun UserEntity.toDomainModel() = User(
+fun UserEntity.toDomainModel(hasNotes: Boolean) = User(
     avatarUrl = this.avatarUrl.orEmpty(),
     htmlUrl = this.htmlUrl.orEmpty(),
     id = this.id,
-    userName = this.userName.orEmpty()
+    userName = this.userName.orEmpty(),
+    hasNotes = hasNotes
 )

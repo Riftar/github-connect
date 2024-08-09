@@ -26,6 +26,7 @@ class ListUserPagingSource(
             )
             if (response.isSuccessful) {
                 val users = response.body().orEmpty().map { it.toDomainModel() }
+                saveDataToLocal(response.body())
                 LoadResult.Page(
                     data = users,
                     prevKey = null,
@@ -39,12 +40,9 @@ class ListUserPagingSource(
         }
     }
 
-    private suspend fun saveDataToLocal(page: Int, data: List<UserResponse>?) = withContext(
+    private suspend fun saveDataToLocal(data: List<UserResponse>?) = withContext(
         Dispatchers.IO
     ) {
-        if (page == 0) {
-            dao.clearAll()
-        }
         dao.insertAll(data.orEmpty().map { it.toEntity() })
     }
 
@@ -56,7 +54,7 @@ class ListUserPagingSource(
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 30
-        const val INITIAL_LOAD_SIZE = 60
+        const val INITIAL_LOAD_SIZE = 30
         const val PROFILE_IMAGE_CACHE_RESOLUTION = 500
     }
 }

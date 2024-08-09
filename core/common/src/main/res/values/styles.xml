@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--    Styles for button-->
+    <style name="ButtonOutline" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/nero_grey</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
 
+    <style name="Primary.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">4dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:background">@drawable/button_main_rounded_8dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="backgroundTint">@null</item>
+    </style>
     <!--    Styles for text-->
     <style name="Title">
         <item name="android:textSize">20sp</item>
@@ -48,7 +66,7 @@
     </style>
 
     <!--    Styles bottomsheet-->
-    <style name="RoundedTopCornerBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="RoundedTopCornerBottomSheetDialogTheme" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/RoundedTopCornerBottomSheetModalStyle</item>
         <item name="android:backgroundDimAmount">0.4</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
