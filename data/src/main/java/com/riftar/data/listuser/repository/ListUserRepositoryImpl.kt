@@ -5,19 +5,24 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.riftar.data.common.database.AppDatabase
+import com.riftar.data.common.notes.room.dao.NotesDao
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toDomainModel
 import com.riftar.data.listuser.pagingsource.ListUserPagingSource
 import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.DEFAULT_PAGE_SIZE
 import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.INITIAL_LOAD_SIZE
 import com.riftar.data.listuser.remotemediator.ListUserRemoteMediator
+import com.riftar.data.listuser.room.dao.ListUserDao
 import com.riftar.domain.listuser.model.User
 import com.riftar.domain.listuser.repository.ListUserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ListUserRepositoryImpl(private val api: ListUserAPI, private val database: AppDatabase) :
+class ListUserRepositoryImpl(
+    private val api: ListUserAPI,
+    private val listUserDao: ListUserDao,
+    private val notesDao: NotesDao
+) :
     ListUserRepository {
 
     /***
@@ -29,10 +34,9 @@ class ListUserRepositoryImpl(private val api: ListUserAPI, private val database:
     override fun getListUserRemoteMediator(): Flow<PagingData<User>> {
         return Pager(
             config = getDefaultPageConfig(),
-            pagingSourceFactory = { database.getListUserDao().pagingSource() },
-            remoteMediator = ListUserRemoteMediator(api, database)
+            pagingSourceFactory = { listUserDao.pagingSource() },
+            remoteMediator = ListUserRemoteMediator(api, listUserDao)
         ).flow.map { pagingData ->
-            val notesDao = database.getNotesDao()
             pagingData.map { userEntity ->
                 val notes = notesDao.getNotesByUserId(userEntity.id)
                 userEntity.toDomainModel(notes != null)
@@ -43,8 +47,20 @@ class ListUserRepositoryImpl(private val api: ListUserAPI, private val database:
     override fun getListUser(): Flow<PagingData<User>> {
         return Pager(
             config = getDefaultPageConfig(),
-            pagingSourceFactory = { ListUserPagingSource(api, database.getListUserDao()) }
+            pagingSourceFactory = { ListUserPagingSource(api, listUserDao) }
         ).flow
+    }
+
+    override fun getListUserByQuery(query: String): Flow<PagingData<User>> {
+        return Pager(
+            config = getDefaultPageConfig(),
+            pagingSourceFactory = { listUserDao.getListUserByQuery(query) }
+        ).flow.map { pagingData ->
+            pagingData.map { userEntity ->
+                val notes = notesDao.getNotesByUserId(userEntity.id)
+                userEntity.toDomainModel(notes != null)
+            }
+        }
     }
 
     private fun getDefaultPageConfig(): PagingConfig {

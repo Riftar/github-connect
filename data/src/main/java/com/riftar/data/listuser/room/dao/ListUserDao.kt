@@ -42,4 +42,7 @@ interface ListUserDao {
 
     @Query("SELECT * FROM $LIST_USER_TABLE ORDER BY id ASC")
     fun pagingSource(): PagingSource<Int, UserEntity>
+
+    @Query("SELECT * FROM $LIST_USER_TABLE WHERE userName LIKE '%' || :query || '%' ORDER BY id ASC")
+    fun getListUserByQuery(query: String): PagingSource<Int, UserEntity>
 }

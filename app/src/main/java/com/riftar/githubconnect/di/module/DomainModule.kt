@@ -11,7 +11,7 @@ import org.koin.dsl.module
 
 val domainModule = module  {
     single<UserDetailRepository> { UserDetailRepositoryImpl(get(), get(), get(), get()) }
-    single<ListUserRepository> { ListUserRepositoryImpl(get(), get()) }
+    single<ListUserRepository> { ListUserRepositoryImpl(get(), get(), get()) }
     single { GetListUserUseCase(get()) }
     single { GetUserDetailUseCase(get()) }
     single { SaveNotesUseCase(get()) }

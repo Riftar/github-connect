@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -86,26 +85,22 @@ class ListUserActivity : ComponentActivity() {
 fun ListUserScreen(modifier: Modifier = Modifier) {
     val viewModel: ListUserViewModel = koinViewModel()
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        SearchBar()
+        SearchBar(viewModel)
         ListOutlet(viewModel)
     }
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(viewModel: ListUserViewModel) {
     var query by rememberSaveable { mutableStateOf("") }
-    val context = LocalContext.current
     OutlinedTextField(
         value = query,
-        onValueChange = {
-            query = it
-            if (query.length > 3) {
-                //TODO search
-                Toast.makeText(context, query, Toast.LENGTH_SHORT).show()
-            }
+        onValueChange = { newQuery ->
+            query = newQuery
+            viewModel.setSearchQuery(query)
         },
         label = { },
-        placeholder = { Text(text = "Input 3 character to search", fontSize = 14.sp) },
+        placeholder = { Text(text = "Search by username", fontSize = 16.sp) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
