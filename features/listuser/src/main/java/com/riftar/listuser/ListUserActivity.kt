@@ -48,6 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -134,9 +136,9 @@ fun ListUser(users: LazyPagingItems<User>) {
             count = users.itemCount,
             key = { index -> users[index]?.id ?: index }
         ) { index ->
-            val outlet = users[index]
-            outlet?.let {
-                UserItem(it)
+            val user = users[index]
+            user?.let {
+                UserItem(it, index)
             }
         }
         users.apply {
@@ -204,7 +206,7 @@ fun EmptyView() {
 
 
 @Composable
-fun UserItem(user: User) {
+fun UserItem(user: User, index: Int) {
     val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
@@ -228,7 +230,8 @@ fun UserItem(user: User) {
                 contentDescription = "user image",
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                colorFilter = createInvertingColorFilter(index)
             )
             Column(
                 modifier = Modifier
@@ -243,6 +246,23 @@ fun UserItem(user: User) {
                 Icon(Icons.AutoMirrored.Outlined.StickyNote2, contentDescription = "note icon")
             }
         }
+    }
+}
+
+/**
+ * Invert color every 4 item
+ */
+fun createInvertingColorFilter(index: Int): ColorFilter? {
+    if ((index + 1) % 4 == 0) {
+        val colorMatrix = floatArrayOf(
+            -1f, 0f, 0f, 0f, 255f,
+            0f, -1f, 0f, 0f, 255f,
+            0f, 0f, -1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f
+        )
+        return ColorFilter.colorMatrix(ColorMatrix(colorMatrix))
+    } else {
+        return null
     }
 }
 
