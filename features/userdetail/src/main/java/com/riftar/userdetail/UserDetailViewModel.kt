@@ -2,6 +2,7 @@ package com.riftar.userdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.riftar.common.helper.NetworkConnectivityObserver
 import com.riftar.domain.userdetail.model.UserDetail
 import com.riftar.domain.userdetail.usecase.GetUserDetailUseCase
 import com.riftar.domain.userdetail.usecase.SaveNotesUseCase
@@ -12,13 +13,21 @@ import kotlinx.coroutines.launch
 
 class UserDetailViewModel(
     private val getUserDetailUseCase: GetUserDetailUseCase,
-    private val saveNotesUseCase: SaveNotesUseCase
+    private val saveNotesUseCase: SaveNotesUseCase,
+    private val networkConnectivityObserver: NetworkConnectivityObserver
 ) : ViewModel() {
     private val _userDetailState = MutableStateFlow<UserDetailState>(UserDetailState.Loading)
     val userDetailState: StateFlow<UserDetailState> = _userDetailState.asStateFlow()
 
     private val _saveNotesState = MutableStateFlow<SaveNotesState>(SaveNotesState.Initial)
     val saveNotesState: StateFlow<SaveNotesState> = _saveNotesState.asStateFlow()
+
+    private var userId: Int? = null
+    private var userName: String? = null
+
+    init {
+        observeNetworkConnectivity()
+    }
 
     fun getFlowUserDetail(userId: Int, userName: String) {
         viewModelScope.launch {
@@ -31,6 +40,11 @@ class UserDetailViewModel(
                         _userDetailState.value =
                             UserDetailState.Error(exception.message ?: "Unknown error occurred")
                     }
+
+                    // Assign this value after the API call to prevent a double call from
+                    // network observer
+                    this@UserDetailViewModel.userId = userId
+                    this@UserDetailViewModel.userName = userName
                 }
         }
     }
@@ -47,6 +61,21 @@ class UserDetailViewModel(
                             SaveNotesState.Error(exception.message ?: "Unknown error occurred")
                     }
                 }
+        }
+    }
+
+    private fun observeNetworkConnectivity() {
+        viewModelScope.launch {
+            networkConnectivityObserver.observe().collect { isConnected ->
+                /**
+                 *  only call API when userId and userName is not null
+                 *  it means after the original API call.
+                 */
+
+                if (isConnected && userId != null && userName != null) {
+                    getFlowUserDetail(userId!!, userName!!)
+                }
+            }
         }
     }
 }
