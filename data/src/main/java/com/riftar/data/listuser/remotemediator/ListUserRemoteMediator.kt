@@ -4,17 +4,18 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import androidx.room.withTransaction
+import com.riftar.data.common.database.AppDatabase
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toEntity
-import com.riftar.data.listuser.room.dao.ListUserDao
 import com.riftar.data.listuser.room.entity.UserEntity
 
 @OptIn(ExperimentalPagingApi::class)
 class ListUserRemoteMediator(
     private val api: ListUserAPI,
-    private val listUserDao: ListUserDao
+    private val appDatabase: AppDatabase
 ) : RemoteMediator<Int, UserEntity>() {
-
+    private val listUserDao = appDatabase.getListUserDao()
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, UserEntity>
@@ -25,19 +26,19 @@ class ListUserRemoteMediator(
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
                     val lastItem = state.lastItemOrNull()
-                        ?: return MediatorResult.Success(endOfPaginationReached = true)
-                    lastItem.id
+                    lastItem?.id ?: 1
                 }
             }
 
             val response = api.getListUser(since = loadKey ?: 0, perPage = state.config.pageSize)
 
-            if (loadType == LoadType.REFRESH) {
-                listUserDao.clearAll()
+            appDatabase.withTransaction {
+                if (loadType == LoadType.REFRESH) {
+                    listUserDao.clearAll()
+                }
+                val users = response.body().orEmpty().map { it.toEntity() }
+                listUserDao.upsertAll(users)
             }
-            val users = response.body().orEmpty().map { it.toEntity() }
-            listUserDao.insertAll(users)
-
             MediatorResult.Success(
                 endOfPaginationReached = response.body().orEmpty().isEmpty()
             )

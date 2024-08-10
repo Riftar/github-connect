@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.riftar.data.common.database.AppDatabase
 import com.riftar.data.common.notes.room.dao.NotesDao
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toDomainModel
@@ -24,10 +25,10 @@ import java.io.IOException
 
 class ListUserRepositoryImpl(
     private val api: ListUserAPI,
-    private val listUserDao: ListUserDao,
-    private val notesDao: NotesDao
-) :
-    ListUserRepository {
+    private val appDatabase: AppDatabase
+) : ListUserRepository {
+    private val listUserDao: ListUserDao = appDatabase.getListUserDao()
+    private val notesDao: NotesDao = appDatabase.getNotesDao()
 
     /***
      * This implementation is still contains bug.
@@ -40,7 +41,7 @@ class ListUserRepositoryImpl(
         return Pager(
             config = getDefaultPageConfig(),
             pagingSourceFactory = { listUserDao.pagingSource() },
-            remoteMediator = ListUserRemoteMediator(api, listUserDao)
+            remoteMediator = ListUserRemoteMediator(api, appDatabase)
         ).flow.map { pagingData ->
             // 2. Map the data to domain model, add notes flag if user has notes
             pagingData.map { userEntity ->

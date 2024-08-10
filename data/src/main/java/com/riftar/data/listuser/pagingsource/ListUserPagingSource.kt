@@ -43,7 +43,7 @@ class ListUserPagingSource(
     private suspend fun saveDataToLocal(data: List<UserResponse>?) = withContext(
         Dispatchers.IO
     ) {
-        dao.insertAll(data.orEmpty().map { it.toEntity() })
+        dao.upsertAll(data.orEmpty().map { it.toEntity() })
     }
 
     override fun getRefreshKey(state: PagingState<Int, User>): Int? {

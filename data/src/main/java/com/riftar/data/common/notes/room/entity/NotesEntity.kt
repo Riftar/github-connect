@@ -6,9 +6,8 @@ import com.riftar.data.common.notes.room.entity.NotesEntity.Companion.NOTES_TABL
 
 @Entity(tableName = NOTES_TABLE)
 data class NotesEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val userId: Int?,
+    @PrimaryKey
+    val userId: Int,
     val notes: String?,
 ) {
     companion object {
