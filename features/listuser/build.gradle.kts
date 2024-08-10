@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":core:common"))
 
     implementation(libs.paging.compose)
+    implementation(libs.paging.runtime)
     implementation(libs.koin.compose)
     implementation(libs.coil.compose)
     implementation(libs.compose.shimmer)
