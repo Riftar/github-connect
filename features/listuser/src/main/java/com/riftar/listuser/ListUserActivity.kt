@@ -74,7 +74,7 @@ class ListUserActivity : ComponentActivity() {
         setContent {
             GithubConnectTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Surface(color = Color.White) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
                         ListUserScreen(
                             modifier = Modifier.padding(innerPadding)
                         )
@@ -133,8 +133,7 @@ fun SearchBar(onSearchQueryChange: (String) -> Unit) {
 fun ListUser(users: LazyPagingItems<User>) {
     LazyColumn {
         items(
-            count = users.itemCount,
-            key = { index -> users[index]?.id ?: index }
+            count = users.itemCount
         ) { index ->
             val user = users[index]
             user?.let {
@@ -210,7 +209,8 @@ fun UserItem(user: User, index: Int) {
     val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -284,7 +284,7 @@ fun LoadingItem() {
 fun LoadingShimmer() {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         modifier = Modifier
             .shimmer()
