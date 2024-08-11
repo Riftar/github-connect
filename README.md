@@ -173,8 +173,7 @@ File Tree
 </details>
 
 ## Screenshots
-<img src=".\screenshot\ss_list.png" alt="list_user" width="200"/>
-<img src=".\screenshot\ss_detail_light.png" alt="detail_user_light" width="200"/>
+<img src=".\screenshot\ss_list.png" alt="list_user" width="200"/> <img src=".\screenshot\ss_detail_light.png" alt="detail_user_light" width="200"/>
 <img src=".\screenshot\ss_detail_dark.png" alt="detail_user_dark" width="200"/>
 <img src=".\screenshot\ss_loading.png" alt="loading" width="200"/>
 <img src=".\screenshot\screen_recording.gif" alt="screen_shot" width="200"/>

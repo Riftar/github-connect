@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -131,6 +132,7 @@ fun SearchBar(onSearchQueryChange: (String) -> Unit) {
 
 @Composable
 fun ListUser(users: LazyPagingItems<User>) {
+    val context = LocalContext.current
     LazyColumn {
         items(
             count = users.itemCount
@@ -151,6 +153,7 @@ fun ListUser(users: LazyPagingItems<User>) {
                 }
 
                 loadState.refresh is LoadState.Error -> {
+                    Toast.makeText(context, (loadState.refresh as LoadState.Error).error.message, Toast.LENGTH_SHORT).show()
                     val e = loadState.refresh as LoadState.Error
                     item {
                         ErrorItem(
