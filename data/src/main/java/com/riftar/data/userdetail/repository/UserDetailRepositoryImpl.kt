@@ -82,7 +82,7 @@ class UserDetailRepositoryImpl(
                     )
                 )
                 // 3. Return result
-                if (rowsAffected > 0) Result.success(Unit) else Result.failure(Exception("Failed to save notes $rowsAffected"))
+                if (rowsAffected > 0) Result.success(Unit) else Result.failure(Exception("Failed to save notes"))
             } catch (e: Exception) {
                 Result.failure(e)
             }

@@ -54,6 +54,9 @@ dependencies {
     api(libs.koin.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.paging)
+    implementation(libs.core.ktx)
+    implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.runner)
     ksp(libs.androidx.room.compiler)
     implementation(libs.okHttpLoggingInterceptor)
     implementation(libs.paging.compose)
@@ -64,4 +67,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.core)
 }

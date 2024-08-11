@@ -9,9 +9,6 @@ import com.riftar.data.common.database.AppDatabase
 import com.riftar.data.common.notes.room.dao.NotesDao
 import com.riftar.data.listuser.api.ListUserAPI
 import com.riftar.data.listuser.mapper.toDomainModel
-import com.riftar.data.listuser.pagingsource.ListUserPagingSource
-import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.DEFAULT_PAGE_SIZE
-import com.riftar.data.listuser.pagingsource.ListUserPagingSource.Companion.INITIAL_LOAD_SIZE
 import com.riftar.data.listuser.remotemediator.ListUserRemoteMediator
 import com.riftar.data.listuser.room.dao.ListUserDao
 import com.riftar.domain.listuser.model.User
@@ -30,11 +27,6 @@ class ListUserRepositoryImpl(
     private val listUserDao: ListUserDao = appDatabase.getListUserDao()
     private val notesDao: NotesDao = appDatabase.getNotesDao()
 
-    /***
-     * This implementation is still contains bug.
-     * The list will load data from internet even though there is a data already on the DB.
-     * Need to fix it on the RemoteMediator level.
-     */
     @OptIn(ExperimentalPagingApi::class)
     override fun getListUserRemoteMediator(): Flow<PagingData<User>> {
         // 1. Fetch data through remote mediator and save to database
@@ -47,33 +39,6 @@ class ListUserRepositoryImpl(
             pagingData.map { userEntity ->
                 val notes = notesDao.getNotesByUserId(userEntity.id)
                 userEntity.toDomainModel(notes != null)
-            }
-        }.retryWhen { cause, attempt ->
-            // 3. Retry the flow when IOException is thrown and the attempt count is less than 3
-            if (cause is IOException && attempt < 3) {
-                val delay = 1000 * (attempt + 1)
-                delay(delay)
-                return@retryWhen true
-            } else {
-                emit(PagingData.empty())
-                return@retryWhen false
-            }
-        }.catch { e ->
-            emit(PagingData.empty())
-        }
-    }
-
-    // TODO delete
-    override fun getListUser(): Flow<PagingData<User>> {
-        // 1. Fetch data through paging source and save to database
-        return Pager(
-            config = getDefaultPageConfig(),
-            pagingSourceFactory = { ListUserPagingSource(api, listUserDao) }
-        ).flow.map { pagingData ->
-            // 2. Add notes flag if user has notes
-            pagingData.map { user ->
-                val notes = notesDao.getNotesByUserId(user.id)
-                user.copy(hasNotes = notes != null)
             }
         }.retryWhen { cause, attempt ->
             // 3. Retry the flow when IOException is thrown and the attempt count is less than 3
@@ -118,9 +83,9 @@ class ListUserRepositoryImpl(
 
     private fun getDefaultPageConfig(): PagingConfig {
         return PagingConfig(
-            pageSize = DEFAULT_PAGE_SIZE,
+            pageSize = 30,
             enablePlaceholders = false,
-            initialLoadSize = INITIAL_LOAD_SIZE
+            initialLoadSize = 30
         )
     }
 }
