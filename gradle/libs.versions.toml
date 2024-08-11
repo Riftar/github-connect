@@ -26,6 +26,9 @@ constraintlayout = "2.1.4"
 roomVersion = "2.6.1"
 kspVersion = "1.9.0-1.0.13" #Need to match Kotlin version
 shimmer = "0.5.0"
+coreKtxVersion = "1.6.1"
+junitKtx = "1.2.1"
+runner = "1.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -67,6 +70,9 @@ paging-compose = { group = "androidx.paging", name = "paging-compose", version.r
 paging-runtime = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "pagingVersion" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

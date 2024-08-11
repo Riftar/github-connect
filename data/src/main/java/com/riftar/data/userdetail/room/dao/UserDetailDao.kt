@@ -12,7 +12,7 @@ import com.riftar.data.userdetail.room.entity.UserDetailEntity.Companion.USER_DE
 @Dao
 interface UserDetailDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(notes: UserDetailEntity)
+    suspend fun insertAll(userDetail: UserDetailEntity)
 
     @Query("DELETE FROM $USER_DETAIL_TABLE")
     suspend fun clearAll()
