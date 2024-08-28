@@ -33,22 +33,17 @@ class UserDetailRepositoryImpl(
         }
 
         // 2. Fetch new data from API and update
-        try {
-            val response = api.getUserDetail(userName)
-            val result = response.body()
-            if (response.isSuccessful && result?.id != null) {
-                val notes = notesDao.getNotesByUserId(result.id)
-                val updatedLocalData = userDetailDao.insertAndGetUserDetail(result.toEntity())
-                updatedLocalData?.let {
-                    emit(Result.success(it.toDomainModel(notes?.notes.orEmpty())))
-                } ?: throw (Exception("Failed to insert or retrieve user detail"))
-            } else {
-                emit(Result.failure(Exception(response.message())))
-            }
-        } catch (e: Exception) {
-            // 3. Emit error to show error immediately, but don't stop the flow
-            emit(Result.failure(e))
-        }
+        val response = api.getUserDetail(userName)
+        val result = response.body()
+        if (response.isSuccessful && result?.id != null) {
+            val notes = notesDao.getNotesByUserId(result.id)
+            val updatedLocalData = userDetailDao.insertAndGetUserDetail(result.toEntity())
+            updatedLocalData?.let {
+                emit(Result.success(it.toDomainModel(notes?.notes.orEmpty())))
+            } ?: throw (Exception("Failed to insert or retrieve user detail"))
+        } else {
+            emit(Result.failure(Exception(response.message())))
+        }       
     }.retryWhen { cause, attempt ->
         // 4. Retry the flow when IOException is thrown and the attempt count is less than 3
         if (cause is IOException && attempt < 3) {
